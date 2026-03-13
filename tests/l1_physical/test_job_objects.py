@@ -116,12 +116,12 @@ print(f"父进程 PID: {{os.getpid()}}", flush=True)
 print("父进程创建 Job Object...", flush=True)
 
 # 创建 Job Object
-job_info = win32job.QueryInformationJobObject(None, win32job.JobObjectBasicAccountingInformation)
 job_handle = win32job.CreateJobObject(None, "SmartHireTestJob")
 
 # 设置 Job Object 属性（在父进程退出时终止所有子进程）
-extended_info = win32job.JOBOBJECT_BASIC_LIMIT_INFORMATION()
-extended_info.LimitFlags = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+extended_info = {{
+    'LimitFlags': win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+}}
 
 win32job.SetInformationJobObject(
     job_handle,
@@ -289,9 +289,10 @@ class TestJobObjectsBasic:
         
         assert job_handle is not None, "Job Object 创建失败"
         
-        # 设置 Job Object 属性
-        extended_info = win32job.JOBOBJECT_BASIC_LIMIT_INFORMATION()
-        extended_info.LimitFlags = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+        # 设置 Job Object 属性（使用字典格式）
+        extended_info = {
+            'LimitFlags': win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+        }
         
         win32job.SetInformationJobObject(
             job_handle,
@@ -549,8 +550,9 @@ print(f"Level 1 PID: {{os.getpid()}}", flush=True)
 
 # 创建 Job Object
 job_handle = win32job.CreateJobObject(None, "ProcessTreeTestJob")
-extended_info = win32job.JOBOBJECT_BASIC_LIMIT_INFORMATION()
-extended_info.LimitFlags = win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+extended_info = {{
+    'LimitFlags': win32job.JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE
+}}
 win32job.SetInformationJobObject(
     job_handle,
     win32job.JobObjectExtendedLimitInformation,
@@ -609,8 +611,11 @@ sys.exit(1)
         for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
             try:
                 cmdline = proc.info['cmdline']
-                if cmdline and any('level' in str(arg) for arg in cmdline):
-                    orphan_processes.append(proc.info['pid'])
+                if cmdline:
+                    # 更精确的匹配：必须是测试目录下的 level 脚本
+                    cmdline_str = ' '.join(str(arg) for arg in cmdline)
+                    if f'{self.test_base.name}' in cmdline_str and 'level' in cmdline_str:
+                        orphan_processes.append(proc.info['pid'])
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
         
@@ -619,6 +624,13 @@ sys.exit(1)
             print(f"  ✅ 无孤儿进程残留")
         else:
             print(f"  ⚠️  发现孤儿进程: {orphan_processes}")
+            # 打印进程信息用于调试
+            for pid in orphan_processes:
+                try:
+                    proc = psutil.Process(pid)
+                    print(f"     PID {pid}: {proc.name()}, 命令行: {proc.cmdline()}")
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
         
         assert len(orphan_processes) == 0, f"进程树完整性验证失败，发现孤儿进程: {orphan_processes}"
 

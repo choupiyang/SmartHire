@@ -126,11 +126,12 @@ def run_subprocess_read_file(file_path: Path, encoding: str = TARGET_ENCODING) -
         subprocess.CompletedProcess: 子进程结果
     """
     # 创建一个简单的 Python 脚本来读取文件
+    # 使用 repr() 来正确转义路径中的特殊字符
     script_content = f'''
 import sys
 from pathlib import Path
 
-file_path = Path("{file_path}")
+file_path = Path(r"{file_path}")
 try:
     with open(file_path, 'r', encoding="{encoding}") as f:
         content = f.read()
@@ -146,15 +147,32 @@ except Exception as e:
         with open(script_path, 'w', encoding='utf-8') as f:
             f.write(script_content)
         
-        # 运行子进程
+        # 运行子进程（先不指定 encoding，处理原始字节）
         result = subprocess.run(
             [sys.executable, str(script_path)],
             capture_output=True,
-            text=True,
-            encoding=TARGET_ENCODING
+            text=False  # 不自动解码，获取原始字节
         )
         
-        return result
+        # 尝试解码输出（先尝试 GBK，失败后尝试 UTF-8）
+        try:
+            stdout_text = result.stdout.decode('gbk')
+            stderr_text = result.stderr.decode('gbk')
+        except UnicodeDecodeError:
+            try:
+                stdout_text = result.stdout.decode('utf-8', errors='replace')
+                stderr_text = result.stderr.decode('utf-8', errors='replace')
+            except Exception:
+                stdout_text = result.stdout.decode('utf-8', errors='replace')
+                stderr_text = result.stderr.decode('utf-8', errors='replace')
+        
+        # 返回修改后的结果
+        return subprocess.CompletedProcess(
+            args=result.args,
+            returncode=result.returncode,
+            stdout=stdout_text,
+            stderr=stderr_text
+        )
     finally:
         # 清理临时脚本
         if script_path.exists():
@@ -447,10 +465,11 @@ class TestEncodingConversion:
         assert result.returncode == 0, f"子进程执行失败: {result.stderr}"
         assert result.stdout == content, f"输出内容不匹配"
         
-        # 检查输出中是否有替换字符（）
-        assert '' not in result.stdout, f"输出包含僵尸字符: {result.stdout}"
+        # 检查输出中是否有 Unicode 替换字符（U+FFFD，表示为 ）
+        replacement_char = '\ufffd'
+        assert replacement_char not in result.stdout, f"输出包含替换字符: {result.stdout}"
         
-        print(f"  ✅ subprocess 输出中无僵尸字符")
+        print(f"  ✅ subprocess 输出中无替换字符")
         print(f"  ✅ 编码正确: UTF-8")
 
 

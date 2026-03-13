@@ -117,8 +117,8 @@ class TestPathDepth:
         assert success, f"5 层目录创建失败: {nested_path}"
         assert nested_path.exists(), f"5 层目录不存在: {nested_path}"
         
-        # 验证路径深度
-        relative_path = nested_path.relative_to(self.root_path)
+        # 验证路径深度（从 test_base 开始计算，排除测试目录本身）
+        relative_path = nested_path.relative_to(self.test_base)
         depth = len(relative_path.parts)
         
         assert depth <= MAX_DEPTH, f"路径深度违规: {depth} > {MAX_DEPTH}"
@@ -163,7 +163,7 @@ class TestPathDepth:
         print("\n📋 测试：260 字符路径（应接受）")
         
         # 创建一个接近 260 字符的路径
-        base = self.test_base / "a" * 50
+        base = self.test_base / ("a" * 50)
         path = base / ("b" * 50) / ("c" * 50) / ("d" * 50)
         
         full_path = self.root_path / path
