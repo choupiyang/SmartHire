@@ -1,0 +1,184 @@
+# SmartHire Requirements
+# Version: 1.0.0
+# Python: 3.10+
+
+# =============================================================================
+# Core Dependencies
+# =============================================================================
+
+# Async Framework
+asyncio>=3.4.3
+asyncio-mqtt>=0.16.1
+
+# Data Validation
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# Type Hints
+typing-extensions>=4.9.0
+
+# =============================================================================
+# IPC & Communication
+# =============================================================================
+
+# Redis Client
+redis>=5.0.0
+hiredis>=2.3.0  # C parser for faster Redis
+
+# Serialization
+msgpack>=1.0.7  # Binary serialization for IPC
+
+# =============================================================================
+# LLM Integration
+# =============================================================================
+
+# Anthropic Claude
+anthropic>=0.25.0
+
+# OpenAI (Alternative)
+openai>=1.10.0
+
+# =============================================================================
+# Database
+# =============================================================================
+
+# SQLite (Built-in, but with enhanced tools)
+apsw>=3.45.0  # Advanced Python SQLite
+sqlalchemy>=2.0.25  # ORM for complex queries
+
+# =============================================================================
+# Windows-Specific
+# =============================================================================
+
+# Windows API Bindings
+pywin32>=306  # Windows API access
+
+# =============================================================================
+# File I/O & Encoding
+# =============================================================================
+
+# File System Operations
+pathlib>=1.0.1
+aiofiles>=23.2.1  # Async file operations
+
+# Encoding Handling
+chardet>=5.2.0  # Encoding detection
+cchardet>=2.1.7  # Fast encoding detection (C implementation)
+
+# =============================================================================
+# Logging & Monitoring
+# =============================================================================
+
+# Structured Logging
+loguru>=0.7.2  # Advanced logging
+python-json-logger>=2.0.7
+
+# Metrics & Monitoring
+prometheus-client>=0.19.0
+
+# =============================================================================
+# Testing Framework (DIAGNOSIS §2)
+# =============================================================================
+
+# Testing
+pytest>=7.4.4
+pytest-asyncio>=0.23.3
+pytest-cov>=4.1.0
+pytest-mock>=3.12.0
+
+# Chaos Testing
+chaostoolkit>=0.23.0
+chaostoolkit-redis>=0.6.0
+
+# LLM Testing
+llm-as-a-judge>=0.1.0  # Custom package
+
+# =============================================================================
+# Development Tools
+# =============================================================================
+
+# Code Quality
+black>=23.12.1
+isort>=5.13.2
+mypy>=1.8.0
+flake8>=7.0.0
+pylint>=3.0.3
+
+# Documentation
+mkdocs>=1.5.3
+mkdocs-material>=9.5.3
+
+# =============================================================================
+# Security
+# =============================================================================
+
+# Security Scanning
+bandit>=1.7.6
+safety>=2.3.5
+
+# =============================================================================
+# Performance
+# =============================================================================
+
+# Profiling
+py-spy>=0.3.14
+
+# =============================================================================
+# Utilities
+# =============================================================================
+
+# Date & Time
+python-dateutil>=2.8.2
+
+# HTTP Client
+httpx>=0.26.0
+aiohttp>=3.9.1
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# Command Line Interface
+click>=8.1.7
+rich>=13.7.0  # Terminal formatting
+typer>=0.9.0  # Modern CLI
+
+# =============================================================================
+# Platform-Specific (Optional)
+# =============================================================================
+
+# Image Processing (for multimodal parsing)
+Pillow>=10.2.0
+
+# OCR (for evidence extraction)
+pytesseract>=0.3.10
+
+# Audio Processing (for voice parsing)
+pydub>=0.25.1
+speechrecognition>=3.10.1
+
+# =============================================================================
+# Documentation Dependencies
+# =============================================================================
+
+# API Documentation
+redoc>=2.0.0
+
+# =============================================================================
+# Version Control
+# =============================================================================
+
+# Git Integration
+GitPython>=3.1.41
+
+# =============================================================================
+# Note: The following are NOT included (LAW-ENV-001: No Containerization)
+# - docker
+# - docker-compose
+# - podman
+# - kubernetes
+#
+# The following are NOT included (LAW-TENANT-001: No Multi-Tenant)
+# - Authentication libraries (JWT, OAuth)
+# - RBAC/Permission systems
+# - User registration/login
+# =============================================================================

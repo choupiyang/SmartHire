@@ -1,0 +1,337 @@
+# SmartHire .gitignore
+# Version: 1.0.0
+# Compliance: LAW-ENV-002 (No absolute paths), LAW-DEF-002 (Data safety)
+
+# =============================================================================
+# Python
+# =============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# =============================================================================
+# SmartHire Specific (LAW-DEF-002: Data Safety)
+# =============================================================================
+
+# Sensitive Information (NEVER commit)
+.env
+.env.local
+.env.production
+*.key
+*.pem
+secrets/
+credentials/
+
+# Data Directories (User data sovereignty)
+data/evidence/*.db
+data/evidence/*.db-journal
+data/profiles/*.db
+data/profiles/*.db-journal
+data/*/!
+
+# Data Backups (LAW-DEF-002: Backup retention)
+backups/
+*.bak
+*.tmp
+*.tmp.*
+
+# Logs (DIAGNOSIS §1.2: Snapshot isolation)
+logs/
+*.log
+
+# Workspace (Temporary write sandbox)
+workspace/
+tmp/
+temp/
+
+# =============================================================================
+# IDE & Editor
+# =============================================================================
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# PyCharm
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+[._*.s[a-v][a-z]
+[._*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+
+# =============================================================================
+# OS Specific
+# =============================================================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Linux
+*~
+.directory
+
+# =============================================================================
+# Project Specific
+# =============================================================================
+
+# Versions (DIAGNOSIS §3.1: State forensics)
+.versions/
+
+# Experimental Code (MAP §5: Shadow evolution)
+*.experimental
+experimental/
+
+# Test Fixtures (User data)
+tests/fixtures/*.db
+tests/fixtures/*.json
+tests/fixtures/*.yaml
+!tests/fixtures/.gitkeep
+
+# Documentation Build
+docs/_build/
+docs/site/
+
+# =============================================================================
+# Temporary Files
+# =============================================================================
+
+*.swp
+*.swo
+*~.nib
+*.bak
+*.tmp
+
+# =============================================================================
+# Security & Compliance
+# =============================================================================
+
+# Security Scan Results
+bandit-report.json
+safety-report.json
+
+# License Reports
+license-reports/
+
+# =============================================================================
+# Performance & Profiling
+# =============================================================================
+
+# Profiling Data
+*.prof
+*.pstats
+
+# Memory Profiling
+*.heap
+
+# =============================================================================
+# Build Artifacts
+# =============================================================================
+
+# Build outputs
+build/
+dist/
+out/
+
+# =============================================================================
+# Dependencies (Optional)
+# =============================================================================
+
+# Uncomment if you want to ignore dependencies
+# dependencies/
+
+# =============================================================================
+# Archive & Legacy
+# =============================================================================
+
+# Legacy code
+legacy/
+old/
+
+# Archive
+archive/
+archived/
+
+# =============================================================================
+# Notes
+# =============================================================================
+#
+# This .gitignore is designed to:
+# 1. Protect sensitive data (API keys, credentials)
+# 2. Respect user data sovereignty (LAW-DEF-002)
+# 3. Maintain compliance with LAW-ENV-002 (no absolute paths)
+# 4. Follow DIAGNOSIS.md testing protocols
+# 5. Support Windows native development (LAW-ENV-001)
+#
+# Always review before committing to ensure:
+# - No API keys or secrets are included
+# - No user data from data/ directory is included
+# - No absolute paths are hardcoded
+# - No containerization configs (LAW-ENV-001)
+#
+# =============================================================================
