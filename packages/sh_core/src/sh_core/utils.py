@@ -317,7 +317,7 @@ def get_next_sequence_id(key: str = "global_sequence") -> int:
     
     try:
         # 使用 Redis INCR 原子操作获取序列号
-        sequence_id = client.incr(key)
+        sequence_id: int = int(client.incr(key))
         return sequence_id
     except redis.RedisError as e:
         # Redis 不可用，返回基于时间戳的序列号（降级方案）
