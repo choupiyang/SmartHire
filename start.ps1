@@ -322,7 +322,7 @@ function Set-SmartHireEnvironment {
     
     Write-Section "环境变量设置完成"
     Write-Success "所有 SmartHire 环境变量已设置"
-    Write-Info "运行 'python ss.py --help' 查看可用命令"
+    Write-Info "运行 'python swan.py --help' 查看可用命令"
 }
 
 function Reset-SmartHireEnvironment {
@@ -541,7 +541,7 @@ function Main {
     }
     
     Write-Host ""
-    Write-Success "环境变量设置完成，可以运行 'python ss.py' 启动系统"
+    Write-Success "环境变量设置完成，可以运行 'python swan.py' 启动系统"
 }
 
 # 执行主函数

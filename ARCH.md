@@ -12,7 +12,7 @@
 遵循 **Python Monorepo** 规范，强制实现业务逻辑与风控引擎的物理隔离。
 
 F:\object\smarthire\
-├── ss.py                           # 系统点火入口
+├── swan.py                         # 系统点火入口（原ss.py）
 ├── start.ps1                       # Windows 环境变量与 Job Objects 注入
 │
 ├── /apps                           # 【进程空间】
