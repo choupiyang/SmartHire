@@ -84,7 +84,7 @@ class TestProcessCleanerWithMockProcess:
         try:
             proc.terminate()
             proc.wait(timeout=2)
-        except:
+        except Exception:
             proc.kill()
 
     def test_process_lifecycle(self, mock_python_process):
