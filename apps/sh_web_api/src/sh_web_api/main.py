@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, AsyncGenerator
 
 from sh_web_api.routes import recruitment, candidates, matching
 from sh_web_api.schemas.api_models import create_error_response
@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 # =============================================================================
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """应用生命周期管理"""
     logger.info("SmartHire Web API启动中...")
     # TODO: 初始化Redis连接
@@ -79,7 +79,7 @@ def create_app() -> FastAPI:
     
     # 健康检查端点
     @app.get("/health")
-    async def health_check():
+    async def health_check() -> dict:
         """健康检查"""
         return {
             "status": "healthy",
@@ -104,7 +104,7 @@ class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
 
-    async def connect(self, client_id: str, websocket: WebSocket):
+    async def connect(self, client_id: str, websocket: WebSocket) -> None:
         """接受连接"""
         await websocket.accept()
         self.active_connections[client_id] = websocket
@@ -116,12 +116,12 @@ class ConnectionManager:
             del self.active_connections[client_id]
             logger.info(f"WebSocket客户端已断开: {client_id}")
 
-    async def send_message(self, client_id: str, message: dict):
+    async def send_message(self, client_id: str, message: dict) -> None:
         """发送消息"""
         if client_id in self.active_connections:
             await self.active_connections[client_id].send_json(message)
 
-    async def broadcast(self, message: dict):
+    async def broadcast(self, message: dict) -> None:
         """广播消息"""
         for connection in self.active_connections.values():
             await connection.send_json(message)
@@ -135,7 +135,7 @@ manager = ConnectionManager()
 # =============================================================================
 
 @app.websocket("/ws/generate")
-async def websocket_generate(websocket: WebSocket):
+async def websocket_generate(websocket: WebSocket) -> None:
     """招募文案生成的WebSocket端点（实时推送AI思考过程）"""
     client_id = websocket.query_params.get("client_id", "unknown")
 
