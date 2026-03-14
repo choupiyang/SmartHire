@@ -72,7 +72,7 @@ class ReviewListResponse(BaseModel):
 
 
 @router.post("/submit", response_model=dict)
-async def submit_review(request: ReviewSubmit):
+async def submit_review(request: ReviewSubmit) -> dict:
     """
     提交审核
     
@@ -189,7 +189,7 @@ async def submit_review(request: ReviewSubmit):
 
 
 @router.get("/query", response_model=ReviewResponse)
-async def query_review(review_id: str = Query(..., description="审核记录ID")):
+async def query_review(review_id: str = Query(..., description="审核记录ID")) -> ReviewResponse:
     """
     查询审核记录
     
@@ -411,7 +411,7 @@ async def get_review_history(
 
 
 @router.get("/stats")
-async def get_review_stats():
+async def get_review_stats() -> dict:
     """
     获取审核统计信息
     
