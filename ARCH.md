@@ -12,7 +12,11 @@
 遵循 **Python Monorepo** 规范，强制实现业务逻辑与风控引擎的物理隔离。
 
 F:\object\smarthire\
-├── swan.py                         # 系统点火入口（原ss.py）
+├── swan.py                         # 系统启动入口（Swan Launcher v2.0）
+├── venv/                           # [已弃用] 改用 swanvenv/
+├── swanvenv/                       # Python虚拟环境（自动创建）
+├── activate.ps1                    # 虚拟环境激活脚本
+├── deactivate.ps1                  # 虚拟环境停用脚本
 ├── start.ps1                       # Windows 环境变量与 Job Objects 注入
 │
 ├── /apps                           # 【进程空间】

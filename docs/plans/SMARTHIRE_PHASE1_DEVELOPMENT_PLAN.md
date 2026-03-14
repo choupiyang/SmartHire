@@ -184,6 +184,142 @@ F:\object\SmartHire\
 
 ---
 
+#### 1.0.4 依赖管理与外部 API 配置 (0.5 天) ⚠️ 新增
+
+**目标:** 配置项目依赖和外部 API 集成
+
+**Textin API 依赖包:**
+
+```bash
+# requirements.txt 新增依赖
+
+# Textin API (文档解析服务)
+# 注意: Textin API 使用标准 HTTP API，无需官方 SDK
+# 我们使用 httpx 进行异步 HTTP 调用
+httpx>=0.24.0        # 异步 HTTP 客户端
+aiofiles>=23.2.1      # 异步文件操作
+
+# 数据处理
+pandas>=2.0.0         # 表格数据处理 (可选)
+python-multipart>=0.0.6  # 文件上传支持
+```
+
+**环境配置 (.env.example):**
+
+```bash
+# =============================================================================
+# External APIs - 外部服务集成
+# =============================================================================
+
+# Textin API (文档解析服务)
+TEXTIN_APP_ID=your_textin_app_id
+TEXTIN_SECRET_CODE=your_textin_secret_code
+TEXTIN_API_BASE_URL=https://api.textin.com
+TEXTIN_PARSE_MODE=auto              # 解析模式: auto/scan/lite/parse/vlm
+TEXTIN_GET_IMAGE=false              # 是否返回图片: none/page/objects/both
+TEXTIN_TABLE_FORMAT=html            # 表格格式: md/html/none
+TEXTIN_APPLY_FORMULA=true           # 是否识别公式 (0:全识别 1:仅行间 2:不识别)
+TEXTIN_DPI=144                      # PDF 坐标基准: 72/144/216
+TEXTIN_TIMEOUT=30                   # 请求超时时间 (秒)
+TEXTIN_MAX_RETRIES=3                # 最大重试次数
+TEXTIN_RETRY_DELAY=2                # 重试延迟 (秒)
+
+# 文件上传限制
+TEXTIN_MAX_FILE_SIZE=500            # 最大文件大小 (MB)
+TEXTIN_MAX_IMAGE_WIDTH=20000        # 最大图片宽度 (像素)
+TEXTIN_MAX_IMAGE_HEIGHT=10000       # 最大图片高度 (像素)
+```
+
+**Textin API 封装设计 (LAW-ENV-003 合规):**
+
+```python
+# packages/sh_external/src/sh_external/textin/client.py
+
+import httpx
+from typing import Any, Dict
+from pydantic import BaseModel
+
+class TextinConfig(BaseModel):
+    """Textin API 配置"""
+    app_id: str
+    secret_code: str
+    api_base_url: str = "https://api.textin.com"
+    parse_mode: str = "auto"
+    get_image: bool = False
+    table_format: str = "html"
+    timeout: int = 30
+
+class TextinClient:
+    """
+    Textin API 客户端
+
+    符合 LAW-ENV-003: 统一的 HTTP API 封装
+    """
+
+    def __init__(self, config: TextinConfig):
+        self.config = config
+        self.client = httpx.AsyncClient(
+            base_url=config.api_base_url,
+            timeout=config.timeout,
+        )
+
+    async def parse_document(
+        self,
+        file_path: str,
+        options: Dict[str, Any] = None
+    ) -> Dict[str, Any]:
+        """
+        解析文档
+
+        Args:
+            file_path: 文件路径
+            options: 解析选项 (覆盖默认配置)
+
+        Returns:
+            包含 markdown, detail, pages 等字段的字典
+
+        Raises:
+            TextinAPIError: API 调用失败
+            TextinAuthError: 认证失败
+            TextinTimeoutError: 请求超时
+        """
+        # 实现细节...
+        pass
+```
+
+**异常处理设计 (LAW-DEF-001 合规):**
+
+```python
+# packages/sh_external/src/sh_external/textin/exceptions.py
+
+class TextinError(Exception):
+    """Textin API 基础异常"""
+    pass
+
+class TextinAuthError(TextinError):
+    """认证失败 (40101/40102)"""
+    pass
+
+class TextinQuotaError(TextinError):
+    """余额不足 (40003)"""
+    pass
+
+class TextinTimeoutError(TextinError):
+    """请求超时"""
+    pass
+
+class TextinParseError(TextinError):
+    """解析失败 (403xx/404xx)"""
+    pass
+```
+
+**备份策略:**
+- [ ] API 密钥安全存储 (`.env` 文件，不提交到 Git)
+- [ ] API 响应缓存 (避免重复解析)
+- [ ] 原始文件备份 (`data/evidence/raw/`)
+
+---
+
 ### 阶段 1.1: 通信总线与进程隔离 (3-4 天)
 
 #### 1.1.1 Redis 总线封装 (IPC-01 合规)
@@ -303,32 +439,197 @@ F:\object\SmartHire\
 
 ---
 
-#### 1.2.3 EXECUTE 进程 (INTUITION 层)
+#### 1.2.3 EXECUTE 进程 (INTUITION 层) ⚠️ 已更新
 
 **目标:** 实现物理存证和直觉解析
+
+**核心功能:** 多模态数据解析与结构化处理
+
+> **重要更新 (v1.2.0):** 集成 **Textin API** 作为文档解析服务
+> - API 端点: `https://api.textin.com/ai/service/v1/pdf_to_markdown`
+> - 支持格式: 图片 (PNG/JPG/PDF)、文档 (Word/Excel/PPT/HTML/TXT)
+> - 返回格式: Markdown + 结构化数据 (位置坐标、表格、公式等)
+> - 文档: https://docs.textin.com/
 
 **任务清单:**
 - [ ] 创建 `apps/sh_execute/main.py`
 - [ ] 实现 `MultimodalParser` 多模态解析
+  - [ ] 集成 Textin API 客户端
+  - [ ] 实现图片/PDF 解析
+  - [ ] 实现文档结构化提取
+  - [ ] 实现位置坐标锚定
 - [ ] 实现 `EvidenceVault` 证据锚点管理
+  - [ ] 存储原始文档
+  - [ ] 存储结构化数据
+  - [ ] 建立 Source_ID 映射
 - [ ] 实现 `ConflictDetector` 逻辑冲突扫描
+  - [ ] 数据一致性检查
+  - [ ] 红线规则验证
 - [ ] 实现幂等性保证 (MAP §1.2)
 - [ ] 实现原子写入协议 (LAW-DATA-002)
+
+**Textin API 集成细节:**
+
+**认证配置:**
+```bash
+# .env.example 新增配置
+# Textin API (文档解析服务)
+TEXTIN_APP_ID=your_textin_app_id
+TEXTIN_SECRET_CODE=your_textin_secret_code
+TEXTIN_API_BASE_URL=https://api.textin.com
+
+# 解析模式配置
+TEXTIN_PARSE_MODE=auto  # auto/scan/lite/parse/vlm
+TEXTIN_GET_IMAGE=false   # 是否返回图片 (none/page/objects/both)
+TEXTIN_TABLE_FORMAT=html  # 表格格式 (md/html/none)
+TEXTIN_APPLY_FORMULA=true  # 是否识别公式
+```
+
+**核心文件结构:**
+```
+apps/sh_execute/
+├── src/sh_execute/
+│   ├── __init__.py
+│   ├── execute_process.py      # EXECUTE 进程主类
+│   ├── operation_executor.py     # 操作执行器
+│   ├── legality_verifier.py      # 法律合规性验证器
+│   ├── multimodal/               # 多模态解析模块
+│   │   ├── __init__.py
+│   │   ├── parser.py              # 解析器基类 (LAW-ENV-003)
+│   │   ├── textin_client.py       # Textin API 客户端
+│   │   ├── image_parser.py        # 图片解析器
+│   │   ├── document_parser.py     # 文档解析器
+│   │   └── data_cleaner.py       # 数据清洗器
+│   ├── evidence/                  # 证据管理模块
+│   │   ├── __init__.py
+│   │   ├── vault.py               # 证据库
+│   │   ├── anchor.py              # 锚点管理
+│   │   └── conflict.py            # 冲突检测
+│   └── utils/
+│       ├── file_handler.py        # 文件处理工具
+│       └── validator.py           # 数据验证工具
+```
+
+**MultimodalParser 接口设计 (符合 LAW-ENV-003):**
+
+```python
+class DocumentParser(ABC):
+    """文档解析器抽象基类"""
+
+    @abstractmethod
+    async def parse(
+        self,
+        file_path: str,
+        options: Dict[str, Any]
+    ) -> ParseResult:
+        """解析文档并返回结构化数据"""
+        pass
+
+class TextinParser(DocumentParser):
+    """Textin API 解析器实现"""
+
+    def __init__(self, config: TextinConfig):
+        self.app_id = config.app_id
+        self.secret_code = config.secret_code
+        self.api_base_url = config.api_base_url
+
+    async def parse(
+        self,
+        file_path: str,
+        options: Dict[str, Any]
+    ) -> ParseResult:
+        """
+        调用 Textin API 解析文档
+
+        Args:
+            file_path: 文件路径
+            options: 解析选项
+                - parse_mode: auto/scan/lite/parse/vlm
+                - get_image: 是否返回图片
+                - table_format: 表格格式 (md/html/none)
+                - apply_formula: 是否识别公式
+
+        Returns:
+            ParseResult: 包含
+                - markdown: Markdown 文本
+                - detail: 结构化元素数组
+                - pages: 分页信息
+                - catalog: 目录结构
+        """
+        # 调用 Textin API
+        # 返回统一格式的 ParseResult
+```
+
+**数据清洗流程:**
+
+1. **原始数据获取**: Textin API 返回原始 JSON
+2. **结构化提取**: 提取 detail、pages、catalog
+3. **数据清洗**:
+   - 去除页眉页脚 (content=1 的元素)
+   - 合并分页元素 (split_section_page_ids)
+   - 标准化坐标 (position 数组)
+   - 提取表格数据 (cells 数组)
+4. **证据锚点**:
+   - 为每个字段绑定 Source_ID
+   - Source_ID 格式: `{page_id}_{paragraph_id}_{type}`
+5. **冲突检测**:
+   - 检查数据一致性
+   - 验证红线规则
 
 **COMPOUND.md 风险规避:**
 - ✅ ENV-02: NTFS 写锁冲突，指数退避重试
 - ✅ LAW-DATA-002: 三步写入协议 (Temp → Flush → Rename)
 - ✅ L1 物理层: 句柄泄露、文件锁死防护
+- ✅ **新增**: LAW-ENV-003: Textin API 统一接口封装
+- ✅ **新增**: 网络超时重试机制 (3 次重试，指数退避)
 
 **测试策略:**
-- [ ] L1 物理层: 原子写入完整性测试
-- [ ] L1 物理层: 证据锚点映射验证测试
-- [ ] L1 物理层: 幂等性测试 (重复执行防护)
-- [ ] 混沌测试: 磁盘满、网络断开故障注入
+- [ ] **L1 物理层**: 原子写入完整性测试
+- [ ] **L1 物理层**: 证据锚点映射验证测试
+- [ ] **L1 物理层**: 幂等性测试 (重复执行防护)
+- [ ] **L2 协议层**: Textin API 通信测试
+  - [ ] 测试文件上传 (PNG/JPG/PDF/Word/Excel)
+  - [ ] 测试认证失败处理
+  - [ ] 测试网络超时重试
+  - [ ] 测试 API 限流处理
+- [ ] **L2 协议层**: 数据结构验证测试
+  - [ ] 测试 Markdown 解析
+  - [ ] 测试表格提取
+  - [ ] 测试位置坐标解析
+- [ ] **L3 逻辑层**: 数据清洗测试
+  - [ ] 测试页眉页脚过滤
+  - [ ] 测试分页合并
+  - [ ] 测试冲突检测
+- [ ] **混沌测试**: 磁盘满、网络断开故障注入
 
 **备份策略:**
 - [ ] 证据链数据库定期备份
 - [ ] 写操作前置快照保存到 `workspace/`
+- [ ] 原始文档备份到 `data/evidence/raw/`
+- [ ] Textin API 响应备份到 `data/evidence/api_responses/`
+
+**Textin API 使用场景:**
+
+1. **候选人简历解析**:
+   - 上传 PDF/Word 简历
+   - 提取工作经验、技能、教育背景
+   - 锚定每个字段到原始位置
+
+2. **职位描述解析**:
+   - 上传图片/PDF 职位描述
+   - 提取薪资、工作时间、技能要求
+   - 结构化存储到数据库
+
+3. **证书/证件解析**:
+   - 上传身份证、学历证书图片
+   - OCR 提取关键信息
+   - 验证真伪（通过位置坐标检测）
+
+**性能指标:**
+- 文档解析响应时间: < 10 秒 (10 页 PDF)
+- 数据清洗准确率: > 95%
+- 位置坐标精度: ±5 像素
+- 幂等性保证: 100% (重复请求相同结果)
 
 ---
 
